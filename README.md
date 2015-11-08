@@ -1,3 +1,7 @@
+
+# Just Playing with Go-Kit. For the real source, see: [https://github.com/go-kit](https://github.com/go-kit)
+
+
 # Examples
 
 1. [A minimal example](#a-minimal-example)
@@ -712,4 +716,3 @@ People don't git me.
 =======
 
 People don't git me.
-
