@@ -13,10 +13,21 @@ import (
 
 // Make Endpoints
 // --------------------------------------------------
+func makeNounEndpoint(svc NounService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(nounRequest)
+		v, err := svc.Noun(req.Noun.Domain)
+		if err != nil {
+			return nounResponse{v, err.Error()}, nil
+		}
+		return nounResponse{v, ""}, nil
+	}
+}
+
 func makePlaceEndpoint(svc NounService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(placeRequest)
-		v, err := svc.Place(req.S)
+		v, err := svc.Place(req.Domain, req.Category)
 		if err != nil {
 			return placeResponse{v, err.Error()}, nil
 		}
@@ -24,19 +35,17 @@ func makePlaceEndpoint(svc NounService) endpoint.Endpoint {
 	}
 }
 
-func makeUppercaseEndpoint(svc NounService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(uppercaseRequest)
-		v, err := svc.Uppercase(req.S)
-		if err != nil {
-			return uppercaseResponse{v, err.Error()}, nil
-		}
-		return uppercaseResponse{v, ""}, nil
+// Decode Requests
+// Extracts a user-domain request object from an HTTP request object.
+// --------------------------------------------------
+func decodeNounRequest(r *http.Request) (interface{}, error) {
+	var request nounRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
 	}
+	return request, nil
 }
 
-// Decode Requests
-// --------------------------------------------------
 func decodePlaceRequest(r *http.Request) (interface{}, error) {
 	var request placeRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -45,16 +54,17 @@ func decodePlaceRequest(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func decodeUppercaseRequest(r *http.Request) (interface{}, error) {
-	var request uppercaseRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+// Decode Responses
+// Extracts a user-domain response object from an HTTP response object.
+// --------------------------------------------------
+func decodeNounResponse(r *http.Response) (interface{}, error) {
+	var response nounResponse
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
 		return nil, err
 	}
-	return request, nil
+	return response, nil
 }
 
-// Decode Responses
-// --------------------------------------------------
 func decodePlaceResponse(r *http.Response) (interface{}, error) {
 	var response placeResponse
 	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
@@ -63,21 +73,15 @@ func decodePlaceResponse(r *http.Response) (interface{}, error) {
 	return response, nil
 }
 
-func decodeUppercaseResponse(r *http.Response) (interface{}, error) {
-	var response uppercaseResponse
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 // Encode Responses
+// Encodes the passed response object to the HTTP response writer.
 // --------------------------------------------------
 func encodeResponse(w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
 }
 
 // Encode Requests
+// Encodes the passed request object into the HTTP request object.
 // --------------------------------------------------
 func encodeRequest(r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
@@ -88,22 +92,40 @@ func encodeRequest(r *http.Request, request interface{}) error {
 	return nil
 }
 
-// Grab the item out of the payload
+// Define a struct for the request payloads
 // --------------------------------------------------
-type placeRequest struct {
-	S string `json:"noun"`
+type nounRequest struct {
+	Noun struct {
+		Category        string    `json:"category"`
+		Coordinates     []float64 `json:"coordinates"`
+		CountryCode     string    `json:"country-code"`
+		Domain          string    `json:"domain"`
+		ExtendedAddress string    `json:"extended-address"`
+		Image           string    `json:"image"`
+		Link            string    `json:"link"`
+		Locality        string    `json:"locality"`
+		Name            string    `json:"name"`
+		PhoneNumber     string    `json:"phone-number"`
+		PostalCode      string    `json:"postal-code"`
+		Region          string    `json:"region"`
+		StreetAddress   string    `json:"street-address"`
+		Tags            []string  `json:"tags"`
+	} `json:"noun"`
 }
 
-type placeResponse struct {
+type nounResponse struct {
 	V   string `json:"v"`
 	Err string `json:"err,omitempty"`
 }
 
-type uppercaseRequest struct {
-	S string `json:"s"`
+// --------------------------------------------------
+
+type placeRequest struct {
+	Domain   string `json:"domain"`
+	Category string `json:"category"`
 }
 
-type uppercaseResponse struct {
+type placeResponse struct {
 	V   string `json:"v"`
 	Err string `json:"err,omitempty"`
 }

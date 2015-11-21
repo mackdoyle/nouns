@@ -51,36 +51,36 @@ type logmw struct {
 	NounService
 }
 
-// Logging for the Place method
+// Logging for the Noun method
 // --------------------------------------------------
-func (mw logmw) Place(s string) (output string, err error) {
+func (mw logmw) Noun(req nounRequest) (output string, err error) {
 	defer func(begin time.Time) {
 		_ = mw.logger.Log(
-			"method", "place",
-			"input", s,
+			"method", "noun",
+			"input", req,
 			"output", output,
 			"err", err,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
 
-	output, err = mw.NounService.Place(s)
+	output, err = mw.NounService.Noun(req)
 	return
 }
 
-// Logging for the Uppercase method
+// Logging for the Place method
 // --------------------------------------------------
-func (mw logmw) Uppercase(s string) (output string, err error) {
+func (mw logmw) Place(domain string, category string) (output string, err error) {
 	defer func(begin time.Time) {
 		_ = mw.logger.Log(
-			"method", "uppercase",
-			"input", s,
+			"method", "place",
+			"input", domain,
 			"output", output,
 			"err", err,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
 
-	output, err = mw.NounService.Uppercase(s)
+	output, err = mw.NounService.Place(domain, category)
 	return
 }

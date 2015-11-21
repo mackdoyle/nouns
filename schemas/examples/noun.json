@@ -1,0 +1,20 @@
+{
+  "noun": {
+    "domain": "place",
+    "category": "outdoor",
+    "name": "Saddle Mountain State Park",
+    "street-address": "",
+    "extended-address": "",
+    "locality": "",
+    "region": "Oregon",
+    "postal-code": "",
+    "country-code": "US",
+    "phone-number": "503-368-5943",
+    "coordinates": [
+      -123.6850659,45.9737721
+    ],
+    "link": "oregonstateparks.org",
+    "image": "",
+    "tags": ["hiking"]
+  }
+}

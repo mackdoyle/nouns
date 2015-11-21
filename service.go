@@ -1,34 +1,31 @@
 package main
 
-import (
-	"errors"
-	"strings"
-)
+import "errors"
 
 // NounService provides operations on strings.
 type NounService interface {
-	Place(string) (string, error)
-	Uppercase(string) (string, error)
+	Noun(nounResponse) (string, error)
+	Place(string, string) (string, error)
 }
 
 type nounService struct{}
 
-// Place
+// Noun
 // --------------------------------------------------
-func (nounService) Place(payload string) (string, error) {
-	if payload == "" {
+func (nounService) Noun(req nounRequest) (string, error) {
+	if req.Noun.Domain == "" {
 		return "", ErrEmpty
 	}
-	return payload, nil
+	return req.Noun.Domain, nil
 }
 
-// Uppercase
+// Place
 // --------------------------------------------------
-func (nounService) Uppercase(s string) (string, error) {
-	if s == "" {
+func (nounService) Place(domain string, category string) (string, error) {
+	if domain == "" {
 		return "", ErrEmpty
 	}
-	return strings.ToUpper(s), nil
+	return domain + " " + category, nil
 }
 
 // ErrEmpty is returned when an input string is empty.

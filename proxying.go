@@ -52,20 +52,20 @@ func proxyingMiddleware(proxyList string, ctx context.Context, logger log.Logger
 // embedded NounService.
 type proxymw struct {
 	context.Context
-	PlaceEndpoint endpoint.Endpoint
+	NounEndpoint endpoint.Endpoint
 	// UppercaseEndpoint endpoint.Endpoint
 	NounService
 }
 
-// Place Proxy
+// Noun Proxy
 // --------------------------------------------------
-func (mw proxymw) Place(s string) (string, error) {
-	response, err := mw.PlaceEndpoint(mw.Context, placeRequest{S: s})
+func (mw proxymw) Noun(req nounRequest) (string, error) {
+	response, err := mw.NounEndpoint(mw.Context, nounRequest{Req: req})
 	if err != nil {
 		return "", err
 	}
 
-	resp := response.(placeResponse)
+	resp := response.(nounResponse)
 	if resp.Err != "" {
 		return resp.V, errors.New(resp.Err)
 	}
@@ -75,14 +75,14 @@ func (mw proxymw) Place(s string) (string, error) {
 func factory(ctx context.Context, qps int) loadbalancer.Factory {
 	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
 		var e endpoint.Endpoint
-		e = makePlaceProxy(ctx, instance)
+		e = makeNounProxy(ctx, instance)
 		e = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(e)
 		e = kitratelimit.NewTokenBucketLimiter(jujuratelimit.NewBucketWithRate(float64(qps), int64(qps)))(e)
 		return e, nil, nil
 	}
 }
 
-func makePlaceProxy(ctx context.Context, instance string) endpoint.Endpoint {
+func makeNounProxy(ctx context.Context, instance string) endpoint.Endpoint {
 	if !strings.HasPrefix(instance, "http") {
 		instance = "http://" + instance
 	}
@@ -91,16 +91,17 @@ func makePlaceProxy(ctx context.Context, instance string) endpoint.Endpoint {
 		panic(err)
 	}
 	if u.Path == "" {
-		u.Path = "/place"
+		u.Path = "/noun"
 	}
 	return httptransport.NewClient(
 		"GET",
 		u,
 		encodeRequest,
-		decodePlaceResponse,
+		decodeNounResponse,
 	).Endpoint()
 }
 
+// --------------------------------------------------
 func split(s string) []string {
 	a := strings.Split(s, ",")
 	for i := range a {

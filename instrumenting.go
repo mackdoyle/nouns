@@ -33,9 +33,23 @@ type instrmw struct {
 	NounService
 }
 
+// Noun
+// --------------------------------------------------
+func (mw instrmw) Noun(req nounRequest) (output string, err error) {
+	defer func(begin time.Time) {
+		methodField := metrics.Field{Key: "method", Value: "noun"}
+		errorField := metrics.Field{Key: "error", Value: fmt.Sprintf("%v", err)}
+		mw.requestCount.With(methodField).With(errorField).Add(1)
+		mw.requestLatency.With(methodField).With(errorField).Observe(time.Since(begin))
+	}(time.Now())
+
+	output, err = mw.NounService.Place(req)
+	return
+}
+
 // Place
 // --------------------------------------------------
-func (mw instrmw) Place(payload string) (output string, err error) {
+func (mw instrmw) Place(domain string, category string) (output string, err error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "place"}
 		errorField := metrics.Field{Key: "error", Value: fmt.Sprintf("%v", err)}
@@ -43,20 +57,6 @@ func (mw instrmw) Place(payload string) (output string, err error) {
 		mw.requestLatency.With(methodField).With(errorField).Observe(time.Since(begin))
 	}(time.Now())
 
-	output, err = mw.NounService.Place(payload)
-	return
-}
-
-// Uppercase
-// --------------------------------------------------
-func (mw instrmw) Uppercase(payload string) (output string, err error) {
-	defer func(begin time.Time) {
-		methodField := metrics.Field{Key: "method", Value: "uppercase"}
-		errorField := metrics.Field{Key: "error", Value: fmt.Sprintf("%v", err)}
-		mw.requestCount.With(methodField).With(errorField).Add(1)
-		mw.requestLatency.With(methodField).With(errorField).Observe(time.Since(begin))
-	}(time.Now())
-
-	output, err = mw.NounService.Uppercase(payload)
+	output, err = mw.NounService.Place(domain, category)
 	return
 }

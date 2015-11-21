@@ -18,7 +18,7 @@ import (
 func main() {
 	// Fire up a simple HTTP server
 	var (
-		listen = flag.String("listen", ":8080", "HTTP listen address")
+		listen = flag.String("listen", ":9000", "HTTP listen address")
 		proxy  = flag.String("proxy", "", "Optional comma-separated list of URLs to proxy requests")
 	)
 	flag.Parse()
@@ -59,6 +59,15 @@ func main() {
 	svc = loggingMiddleware(logger)(svc)
 	svc = instrumentingMiddleware(requestCount, requestLatency, countResult)(svc)
 
+	// Noun Handler
+	// --------------------------------------------------
+	nounHandler := httptransport.NewServer(
+		ctx,
+		makeNounEndpoint(svc),
+		decodeNounRequest,
+		encodeResponse,
+	)
+
 	// Place Handler
 	// --------------------------------------------------
 	placeHandler := httptransport.NewServer(
@@ -68,18 +77,9 @@ func main() {
 		encodeResponse,
 	)
 
-	// Uppercase Handler
-	// --------------------------------------------------
-	uppercaseHandler := httptransport.NewServer(
-		ctx,
-		makeUppercaseEndpoint(svc),
-		decodeUppercaseRequest,
-		encodeResponse,
-	)
-
 	// Define Endpoints
 	// --------------------------------------------------
-	http.Handle("/uppercase", uppercaseHandler)
+	http.Handle("/noun", nounHandler)
 	http.Handle("/place", placeHandler)
 	http.Handle("/metrics", stdprometheus.Handler())
 	_ = logger.Log("msg", "HTTP", "addr", *listen)

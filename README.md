@@ -1,6 +1,11 @@
 
-# Just Playing with Go-Kit. For the real source, see: [https://github.com/go-kit](https://github.com/go-kit)
+## Just Playing with Go-Kit. For the real source, see: [https://github.com/go-kit](https://github.com/go-kit)
 
+## To start http servers for proxing test, us:
+
+```bash
+nouns -listen=:8001 & nouns -listen=:8002 & nouns -listen=:8003 & nouns -listen=:9000 -proxy=localhost:8001,localhost:8002,localhost:8003
+```
 
 # Examples
 
