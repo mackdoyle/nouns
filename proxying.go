@@ -53,19 +53,26 @@ func proxyingMiddleware(proxyList string, ctx context.Context, logger log.Logger
 type proxymw struct {
 	context.Context
 	NounEndpoint endpoint.Endpoint
-	// UppercaseEndpoint endpoint.Endpoint
 	NounService
 }
 
 // Noun Proxy
 // --------------------------------------------------
 func (mw proxymw) Noun(req nounRequest) (string, error) {
-	response, err := mw.NounEndpoint(mw.Context, nounRequest{Req: req})
+	response, err := mw.NounEndpoint(mw.Context, nounRequest{Noun: req.Noun})
+
+	fmt.Println("Entering Proxy Method") // DEBUGGING
+	fmt.Println(req.Noun)                // DEBUGGING
+
 	if err != nil {
 		return "", err
 	}
 
 	resp := response.(nounResponse)
+
+	fmt.Println("Noun Proxy Response:") // DEBUGGING
+	fmt.Println(resp)                   // DEBUGGING
+
 	if resp.Err != "" {
 		return resp.V, errors.New(resp.Err)
 	}

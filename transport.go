@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -13,10 +14,15 @@ import (
 
 // Make Endpoints
 // --------------------------------------------------
+
 func makeNounEndpoint(svc NounService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(nounRequest)
-		v, err := svc.Noun(req.Noun.Domain)
+		v, err := svc.Noun(req)
+
+		fmt.Println("Making Noun Endpoint") // DEBUGGING
+		fmt.Println(req.Noun)               // DEBUGGING
+
 		if err != nil {
 			return nounResponse{v, err.Error()}, nil
 		}
@@ -28,6 +34,10 @@ func makePlaceEndpoint(svc NounService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(placeRequest)
 		v, err := svc.Place(req.Domain, req.Category)
+
+		fmt.Println("Making Place Endpoint") // DEBUGGING
+		fmt.Println(req)                     // DEBUGGING
+
 		if err != nil {
 			return placeResponse{v, err.Error()}, nil
 		}
@@ -43,6 +53,10 @@ func decodeNounRequest(r *http.Request) (interface{}, error) {
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
+	fmt.Println("Decoding Noun Request") // DEBUGGING
+	fmt.Println(request)                 // DEBUGGING
+
 	return request, nil
 }
 
@@ -96,21 +110,21 @@ func encodeRequest(r *http.Request, request interface{}) error {
 // --------------------------------------------------
 type nounRequest struct {
 	Noun struct {
-		Category        string    `json:"category"`
-		Coordinates     []float64 `json:"coordinates"`
-		CountryCode     string    `json:"country-code"`
-		Domain          string    `json:"domain"`
-		ExtendedAddress string    `json:"extended-address"`
-		Image           string    `json:"image"`
-		Link            string    `json:"link"`
-		Locality        string    `json:"locality"`
-		Name            string    `json:"name"`
-		PhoneNumber     string    `json:"phone-number"`
-		PostalCode      string    `json:"postal-code"`
-		Region          string    `json:"region"`
-		StreetAddress   string    `json:"street-address"`
-		Tags            []string  `json:"tags"`
-	} `json:"noun"`
+		Category        string    `json:"category" xml:"category"`
+		Coordinates     []float64 `json:"coordinates" xml:"coordinates"`
+		CountryCode     string    `json:"country-code" xml:"country-code"`
+		Domain          string    `json:"domain" xml:"domain"`
+		ExtendedAddress string    `json:"extended-address" xml:"extended-address"`
+		Image           string    `json:"image" xml:"image"`
+		Link            string    `json:"link" xml:"link"`
+		Locality        string    `json:"locality" xml:"locality"`
+		Name            string    `json:"name" xml:"name"`
+		PhoneNumber     string    `json:"phone-number" xml:"phone-number"`
+		PostalCode      string    `json:"postal-code" xml:"postal-code"`
+		Region          string    `json:"region" xml:"region"`
+		StreetAddress   string    `json:"street-address" xml:"street-address"`
+		Tags            []string  `json:"tags" xml:"tags"`
+	} `json:"noun" xml:"noun"`
 }
 
 type nounResponse struct {

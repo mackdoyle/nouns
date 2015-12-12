@@ -33,7 +33,7 @@ type instrmw struct {
 	NounService
 }
 
-// Noun
+// Noun Decorator
 // --------------------------------------------------
 func (mw instrmw) Noun(req nounRequest) (output string, err error) {
 	defer func(begin time.Time) {
@@ -43,11 +43,11 @@ func (mw instrmw) Noun(req nounRequest) (output string, err error) {
 		mw.requestLatency.With(methodField).With(errorField).Observe(time.Since(begin))
 	}(time.Now())
 
-	output, err = mw.NounService.Place(req)
+	output, err = mw.NounService.Noun(req)
 	return
 }
 
-// Place
+// Place Decorator
 // --------------------------------------------------
 func (mw instrmw) Place(domain string, category string) (output string, err error) {
 	defer func(begin time.Time) {

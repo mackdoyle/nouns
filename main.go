@@ -1,3 +1,23 @@
+// ==================================================
+// Nouns
+// ==================================================
+// Start in proxy mode
+// nouns -listen=:8001 &
+// nouns -listen=:8002 &
+// nouns -listen=:8003 &
+// nouns -listen=:9000 -proxy=localhost:8001,localhost:8002,localhost:8003
+//
+// Or Run all at once?
+// nouns -listen=:8001 & nouns -listen=:8002 & nouns -listen=:8003 & nouns -listen=:9000 -proxy=localhost:8001,localhost:8002,localhost:8003
+//
+// Posting to the nouns service
+// curl -XPOST -d '{"s":"hello, world"}' localhost:9000/place
+// curl -X POST -d "$(cat ~/Desktop/place.json)" localhost:9000/place
+//
+// Kill the servers
+// kill -9  $(ps aux | grep listen | grep -v grep | awk '{print $2}')
+// ==================================================
+
 package main
 
 import (
